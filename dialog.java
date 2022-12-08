@@ -5,8 +5,10 @@ import java.util.regex.*;
 
 class File_Dialog  implements ActionListener
 {
-	Frame f1=new Frame();
+	Frame f1=new Frame();  //  main frame 
+	Frame f2=new Frame();
 	Frame ff2=new Frame();
+	int fcount=0;
 	MenuBar m1=new MenuBar();
 	Menu files=new Menu("FILES");
 	Menu Edit=new Menu("EDIT");
@@ -16,14 +18,14 @@ class File_Dialog  implements ActionListener
 	Window closee;
 	Button  S_ave=new Button("save changes");	
 	Button not_save=new Button("Don't save ");
-		
-	
 	TextField t2;
 		Button replace;
 			Button replace_all;
 
 		int prev=0,next=0;
 			int end=0;
+		String content;
+		String new_content;
 
 		String add=null;
 
@@ -39,13 +41,11 @@ class File_Dialog  implements ActionListener
 	MenuItem Save=new MenuItem("SAVE");
 		
 	TextArea ta1=new TextArea("",40,40,TextArea.SCROLLBARS_BOTH);
-
-
-
+	int StartingIndex = 0;
+	int EndingIndex = 0;
+	
 	File_Dialog()
 	{
-		
-		
 
 		f1.setSize(400,400);
 		WindowCloserNotepad w=new WindowCloserNotepad();
@@ -83,8 +83,11 @@ class File_Dialog  implements ActionListener
 
 		f1.setMenuBar(m1);
 			f1.setVisible(true);
-	
-	
+			 MyKeyListener key=new MyKeyListener();
+
+		
+		ta1.addKeyListener(key);
+		
 
 	}
 
@@ -94,30 +97,86 @@ class File_Dialog  implements ActionListener
 			
 			public void windowClosing(WindowEvent we1)
 			{
-				Window w=we1.getWindow();
-				
-				ff2=new Frame();
-				
+				System.out.println("content under windowClosingNotepad is  "+content+" and new_content is "+new_content);
+
+				if(add==null)
+				{
+						
+					Window w=we1.getWindow();
+					//w.setVisible(false);
+					ff2.setAlwaysOnTop(true);
+					ff2=new Frame();
+					WindowCloser op=new WindowCloser();
+					ff2.setSize(500,100);
+					Panel p1=new Panel();
+					Label l1=new Label(" DO YOU WANT TO SAVE CHANGES ? ");
+					p1.add(l1);
 					
-				ff2.setSize(500,100);
-				Panel p1=new Panel();
-				Label l1=new Label(" DO YOU WANT TO SAVE CHANGES ? ");
-				p1.add(l1);
-				
-				p1.add(S_ave);
-				p1.add(not_save);
-				ff2.setVisible(true);
-				
-				ff2.add(p1);
-				          
-			}			
+					p1.add(S_ave);
+					p1.add(not_save);
+					ff2.setVisible(true);
+					ff2.setAlwaysOnTop(true);
+					ff2.addWindowListener(op);
+					
+					ff2.add(p1);
+					//destroy's frame
+				}
+				else if(!(content.equals(new_content)) && new_content!=null)
+				{
+					Window w=we1.getWindow();
+					//w.setVisible(false);
+					ff2.setAlwaysOnTop(true);
+					ff2=new Frame();
+					WindowCloser op=new WindowCloser();
+					ff2.setSize(500,100);
+					Panel p1=new Panel();
+					Label l1=new Label(" DO YOU WANT TO SAVE CHANGES ? ");
+					p1.add(l1);
+					
+					p1.add(S_ave);
+					p1.add(not_save);
+					ff2.setVisible(true);
+					ff2.setAlwaysOnTop(true);
+					ff2.addWindowListener(op);
+					
+					ff2.add(p1);
+					//destroy's frame
+
+				}
+				else
+				{
+						System.exit(1);
+				}
+				if( new_content==null)
+				{
+					System.exit(1);
+				}
+			}  
 		
 		}
+		public class MyKeyListener extends Frame implements KeyListener 
+		{
+			public void keyPressed(KeyEvent e) 
+			{    
+    			}   
+			 public void keyReleased(KeyEvent e)
+			{	
+			}
+				
+			public void keyTyped(KeyEvent e)
+			{
+				System.out.println("some key is pressed");   
+
+				new_content=ta1.getText(); 	
 		
+			}
+			
+		}
+		
+	
 	public void actionPerformed(ActionEvent e1)
 	{
 		FileDialog ff=null;
-		
 		WindowCloser ww=new WindowCloser();
 		ff2.addWindowListener(ww);
 
@@ -131,9 +190,11 @@ class File_Dialog  implements ActionListener
 			 ff=new FileDialog(f1,"OPEN dialogbox");
 			ff.setFile("*.txt");
  			ff.setVisible(true);
-			
-			add=ff.getDirectory()+ff.getFile();
-			//System.out.println(add);
+			if(ff.getDirectory()!=null)
+			{
+				add=ff.getDirectory()+ff.getFile();
+			}
+			System.out.println("address under open is "+add);
 			if(add!=null)
 			{
 				System.out.println(add);
@@ -153,16 +214,21 @@ class File_Dialog  implements ActionListener
 				{
 
 				}
-				
+				content=ta1.getText();
 			}			
-
+			if(add=="nullnull")
+			{
+				ta1.setText("");
+			}
+					
 		}
 
 		if(e1.getSource()==Find)
 		{
-			Frame f2=new Frame();
-
-			
+			f2.dispose();
+			f2=new Frame();
+			//f2.setAlwaysOnTop(false);
+			f2.setAlwaysOnTop(true);			
 			f2.setSize(300,200);
 			Label l1=new Label("Enter word below which you want to find ");
 			WindowCloser w=new WindowCloser();
@@ -170,44 +236,53 @@ class File_Dialog  implements ActionListener
 			f2.addWindowListener(w);
 			p1.add(l1); p1.add(t1);  p1.add(b1); p1.add(b2);		
 			f2.add(p1);
-			
 		
-			f2.setVisible(true);		
-		
-						
+			f2.setVisible(true);			
 		}
 		
 		if(e1.getSource()==b1)
 		{
+			
 			this.f1.setAlwaysOnTop(false); 
 			String fword=t1.getText();
-			String content=ta1.getText();
-			this.f1.setAlwaysOnTop(true); 
-			content=content.replace("\r","");
+			 new_content=ta1.getText();		
+			//this.f1.setAlwaysOnTop(true); 
+			f2.setAlwaysOnTop(true);
+			new_content=new_content.replace("\r","");
 			
-			System.out.println("length of string is "+content.length()+" and content is "+content);
-			Pattern p=Pattern.compile(fword,Pattern.MULTILINE);		
-			Matcher m=p.matcher(content);
+			System.out.println("length of string is "+new_content.length()+" and new_content is "+new_content);
+			Pattern p=Pattern.compile(fword);		
+			Matcher m=p.matcher(new_content);
 			boolean t=true;				
 			prev=end;
 			while(t)
 			{
+				if(!new_content.contains(fword))
+				{
+					t=false;
+				}
+				
 		 		while(m.find(end))
 				{	
-						
+					StartingIndex = m.start();
+					EndingIndex = m.end();
+					System.out.println("starting index is "+ StartingIndex + " and ending index is " + EndingIndex );
 					System.out.println(m.start()+"\t"+m.end()+"\t"+m.group());
 					end=m.end();
 					next=end;
 					System.out.println("start= "+m.start()+"  end= "+end+" and prev= "+prev+" next= "+next);
-				
+					this.f1.setAlwaysOnTop(true); 
 					ta1.select(m.start(),m.end());	
-					t=false;						
+					t=false;	
+					this.f1.setAlwaysOnTop(false); 
+					f2.setAlwaysOnTop(true);					
 					break;
 				}
 				if(prev==next)
 				{
 					System.out.println("terminateddddd");
 					end=0;
+					
 					continue;
 				}	
 			}		
@@ -215,8 +290,8 @@ class File_Dialog  implements ActionListener
 
 		if(e1.getSource()==Find_and_Replace)
 		{
-
-			Frame f2=new Frame();
+			this.f2.dispose();
+			this.f2=new Frame();
 			t1.setText("");
 			f2.setSize(350,200);
 			Label l1=new Label("Enter word below which you want to find and replace");
@@ -234,80 +309,49 @@ class File_Dialog  implements ActionListener
 			f2.addWindowListener(w);
 			p1.add(l1); p1.add(l2);p1.add(t1); p1.add(l3); p1.add(t2); p1.add(b1); p1.add(replace); p1.add(replace_all);p1.add(b2);		
 			f2.add(p1);
-			
 		
 			f2.setVisible(true);		
-		
 
 			System.out.println(e1.getSource()+"  is clicked");		
 			String fword=t1.getText();
-			String content=ta1.getText();
+			 new_content=ta1.getText();
 			 
-			//content=content.replace("\n","");
-			content=content.replace("\r","");
+			new_content=new_content.replace("\r","");
 			
-			System.out.println("length of string is "+content.length()+" and content is "+content+"\n"+" fword= "+fword);
-			Pattern p=Pattern.compile(fword,Pattern.MULTILINE);		
-			Matcher m=p.matcher(content);
-			boolean t=true;				
-			prev=end;
-			while(t)
-			{
-		 		while(m.find(end))
-				{	
-						
-					System.out.println(m.start()+"\t"+m.end()+"\t"+m.group());
-					end=m.end();
-					next=end;
-					System.out.println("start= "+m.start()+"  end= "+end+" and prev= "+prev+" next= "+next);
-				
-					ta1.select(m.start(),m.end());	
-					t=false;						
-					break;
-				}
-				if(prev==next)
-				{
-					System.out.println("terminateddddd");
-					end=0;
-					continue;
-				}	
-			}		
-
-
+			System.out.println("length of string is "+new_content.length()+" and new_content is "+new_content+"\n"+" fword= "+fword);
 		}
 
 		if(e1.getSource()==replace)
 		{ 
-			
-			 String remove_with=t2.getText();
+			String remove_with=t2.getText();
+	
 			String fword=t1.getText();
-			String content=ta1.getText();
-			System.out.println("length of string is "+content.length()+" and content is "+content+"\n"+" fword= "+fword);
-			
+			 new_content=ta1.getText();
+			System.out.println("length of string is "+new_content.length()+" and new_content is "+new_content+"\n"+" fword= "+fword);
+			StringBuffer buf = new StringBuffer(new_content);
+      			 buf.replace(StartingIndex, EndingIndex, remove_with); 
 			System.out.println(e1.getSource());
 			Pattern p=Pattern.compile(fword);		
-			Matcher m=p.matcher(content);
-			
-			ta1.setText(m.replaceFirst(remove_with));
-			
+			Matcher m=p.matcher(new_content);
+			ta1.setText(buf.toString());
+			new_content=ta1.getText();
 			String sell=ta1.getText();
-			System.out.println(sell);
-			
+			System.out.println(sell);	
 		}
 		if(e1.getSource()==replace_all)
 		{
 			String remove_with=t2.getText();
 			String fword=t1.getText();
-			String content=ta1.getText();
+			new_content=ta1.getText();
 			 
-			content=content.replace("\r","");
+			new_content=new_content.replace("\r","");
 			
-			System.out.println("length of string is "+content.length()+" and content is "+content);
+			System.out.println("length of string is "+new_content.length()+" and new_content is "+new_content);
 			Pattern p=Pattern.compile(fword);		
-			Matcher m=p.matcher(content);
+			Matcher m=p.matcher(new_content);
 			
 			ta1.setText(m.replaceAll(remove_with));
-			
+			new_content=ta1.getText();
 		}
 	
 		if(e1.getActionCommand()=="SAVE AS")
@@ -331,10 +375,10 @@ class File_Dialog  implements ActionListener
 						File f1=new File(add);
 						f1.createNewFile();	
 						FileOutputStream FOS=new FileOutputStream(f1);
-						String content=ta1.getText();
-						content=content.replace("\r","");
+						 new_content=ta1.getText();
+						new_content=new_content.replace("\r","");
 			
-						char cc[]=content.toCharArray();
+						char cc[]=new_content.toCharArray();
 						RandomAccessFile RAF=new RandomAccessFile(f1,"rw");
 						RAF.seek(0);
 						int i=0;
@@ -375,10 +419,10 @@ class File_Dialog  implements ActionListener
 						File f1=new File(add);
 						f1.createNewFile();	
 						FileOutputStream FOS=new FileOutputStream(f1);
-						String content=ta1.getText();
-						content=content.replace("\r","");
+						new_content=ta1.getText();
+						new_content=new_content.replace("\r","");
 			
-						char cc[]=content.toCharArray();
+						char cc[]=new_content.toCharArray();
 						RandomAccessFile RAF=new RandomAccessFile(f1,"rw");
 						RAF.seek(0);
 						int i=0;
@@ -401,15 +445,15 @@ class File_Dialog  implements ActionListener
 			{
 				System.out.println("their is some addresss "+add);
 		
-				try
+					try
 					{
 						File f1=new File(add);
 						f1.createNewFile();	
 						FileOutputStream FOS=new FileOutputStream(f1);
-						String content=ta1.getText();
-						content=content.replace("\r","");
+						new_content=ta1.getText();
+						new_content=new_content.replace("\r","");
 			
-						char cc[]=content.toCharArray();
+						char cc[]=new_content.toCharArray();
 						RandomAccessFile RAF=new RandomAccessFile(f1,"rw");
 						RAF.seek(0);
 						int i=0;
@@ -424,15 +468,16 @@ class File_Dialog  implements ActionListener
 					{
 		
 					}
-		
+				
 			}
+			content=new_content;
 		}
 
-	
 						if(e1.getSource()==S_ave)
 						{
 							
 							ff2.setVisible(false);
+							ff2.dispose();
 							if(add==null)
 							{
 								 ff=new FileDialog(f1,"OPEN dialogbox",FileDialog.SAVE);
@@ -453,10 +498,10 @@ class File_Dialog  implements ActionListener
 										File f1=new File(add);
 										f1.createNewFile();	
 										FileOutputStream FOS=new FileOutputStream(f1);
-										String content=ta1.getText();
-										content=content.replace("\r","");
+										new_content=ta1.getText();
+										new_content=new_content.replace("\r","");
 			
-										char cc[]=content.toCharArray();
+										char cc[]=new_content.toCharArray();
 										RandomAccessFile RAF=new RandomAccessFile(f1,"rw");
 										RAF.seek(0);
 										int i=0;
@@ -465,22 +510,20 @@ class File_Dialog  implements ActionListener
 											FOS.write(cc[i]);
 											i++;
 										}
-						
+								
 									}
 									catch(Exception e)
 									{
 		
 									}
-									f1.setVisible(false);
-									System.exit(1);
-
+									
 								}
 							}
 		
 				
-						}
-						if(add!=null)
-						{
+						
+						    if(add!=null)
+						    {
 							System.out.println("their is some addresss "+add);
 				
 							try
@@ -488,10 +531,10 @@ class File_Dialog  implements ActionListener
 								File f1=new File(add);
 								f1.createNewFile();	
 								FileOutputStream FOS=new FileOutputStream(f1);
-								String content=ta1.getText();
-								content=content.replace("\r","");
+								new_content=ta1.getText();
+								new_content=new_content.replace("\r","");
 			
-								char cc[]=content.toCharArray();
+								char cc[]=new_content.toCharArray();
 								RandomAccessFile RAF=new RandomAccessFile(f1,"rw");
 								RAF.seek(0);
 								int i=0;
@@ -500,27 +543,28 @@ class File_Dialog  implements ActionListener
 									FOS.write(cc[i]);
 									i++;
 								}
-					
+								
 							}
+							
 							catch(Exception e)
 							{
 		
-							}
-		
-						}
-						if(e1.getSource()==not_save)	
-						{
+							}	
+								
+									
+						 }
+						this.f1.setVisible(false);
+									this.f1.dispose();	
+					}
+					if(e1.getSource()==not_save)	
+					{
 			
-							System.exit(1);
+						System.exit(1);
 							
-						}
-
-		
+					}	
 		
 	}
 
-	
-	
 }
 
 
